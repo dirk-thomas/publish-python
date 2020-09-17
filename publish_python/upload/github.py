@@ -4,6 +4,7 @@
 import json
 import os
 import subprocess
+import urllib.request
 
 from publish_python.package import get_package_name_and_version
 
@@ -56,9 +57,21 @@ def upload_github(*, artifacts, upload, config):
                 f"More than one GitHub releases for the tag '{pkg.version}' " \
                 'exists'
             response = response[0]
+        release_id = response['id']
         upload_url = response['upload_url'].split('{', 1)[0]
     else:
+        release_id = ':release_id'
         upload_url = '<upload_url>'
+
+    # get list of existing release assets
+    assets = {}
+    cmd = ['gh', 'api', f'/repos/{repository}/releases/{release_id}/assets']
+    if upload:
+        output = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
+        response = json.loads(output)
+        for asset in response:
+            assets[asset['name']] = (
+                asset['size'], asset['browser_download_url'])
 
     # use the upload_url from the last response to upload artifacts
     for artifact in artifacts:
@@ -66,18 +79,34 @@ def upload_github(*, artifacts, upload, config):
         if ext not in ('.deb', '.whl'):
             continue
 
+        basename = os.path.basename(artifact)
+        if basename in assets:
+            if os.stat(artifact).st_size == assets[basename][0]:
+                # download asset and check if it is identical to the artifact
+                with urllib.request.urlopen(assets[basename][1]) as h:
+                    asset_data = h.read()
+                with open(artifact, 'rb') as h:
+                    artifact_data = h.read()
+                if asset_data == artifact_data:
+                    print(
+                        '\nExisting GitHub release asset matches the artifact '
+                        f"'{basename}', skipping the upload\n")
+                    continue
+            print(
+                '\nExisting GitHub release asset differs from the artifact '
+                f"'{basename}'\n")
+
         cmd = [
-            'gh', 'api', upload_url + f'?name={os.path.basename(artifact)}',
+            'gh', 'api', upload_url + f'?name={basename}',
             '--header', 'Content-Type: application/octet-stream',
             '--input', artifact]
         print('$', *[f'"{c}"' if ' ' in c else c for c in cmd])
         if upload:
             try:
-                subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
+                subprocess.check_call(cmd, stderr=subprocess.DEVNULL)
             except subprocess.CalledProcessError:
                 raise RuntimeError(
-                    'Failed to upload artifact '
-                    f"'{os.path.basename(artifact)}' to GitHub release")
+                    f"Failed to upload artifact '{basename}' to GitHub "
+                    'release')
             print(
-                f"\nUploaded artifact '{os.path.basename(artifact)}' to "
-                'GitHub release\n')
+                f"\nUploaded artifact '{basename}' to GitHub release\n")
