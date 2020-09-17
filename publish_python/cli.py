@@ -4,6 +4,8 @@
 import argparse
 import collections
 import functools
+import os
+import subprocess
 import sys
 
 from publish_python.config import get_publishings
@@ -45,6 +47,18 @@ def main(argv=sys.argv[1:]):
     print('\n== Determine package name and version')
     print(f'Package: {package.name}')
     print(f'Version: {package.version}')
+
+    # try to get timestamp of tag to make builds reproducible
+    try:
+        timestamp = subprocess.check_output(
+            ['git', 'log', '-1', '--format=%at', package.version])
+    except subprocess.CalledProcessError:
+        pass
+    else:
+        timestamp = timestamp.rstrip().decode()
+        os.environ['SOURCE_DATE_EPOCH'] = timestamp
+        print(
+            f'\n== Set SOURCE_DATE_EPOCH={timestamp} for reproducible builds')
 
     # create target hierarchy mapping from an artifact to uploads
     targets = collections.OrderedDict()
