@@ -55,8 +55,8 @@ Upload to GitHub release
 Usage
 -----
 
-To build all artifacts configured in the ``publish_python.yaml`` file call:
-``bin/publish_python``.
+To build all artifacts configured in the ``publish-python.yaml`` file call:
+``bin/publish-python``.
 While this also shows the necessary commands to upload the artifacts no upload
 is being performed.
 
@@ -75,7 +75,7 @@ For more information about possible command line arguments pass ``--help``.
 Configuration
 -------------
 
-A configuration file ``publish_python.yaml`` must be present in the root of the
+A configuration file ``publish-python.yaml`` must be present in the root of the
 Python package.
 
 On the top level it must contain a key ``artifacts`` containing a list.
@@ -122,7 +122,7 @@ GitHub release configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * The optional key ``repository`` describes the org unit and repository name to
-  identify the upload destination (e.g. ``dirk-thomas/publish_python``).
+  identify the upload destination (e.g. ``dirk-thomas/publish-python``).
   If the invocation is happening in a git repository the location can be
   determined automatically.
 
@@ -152,4 +152,4 @@ Example
                 - debian:buster
           - type: github
             config:
-              repository: dirk-thomas/publish_python
+              repository: dirk-thomas/publish-python

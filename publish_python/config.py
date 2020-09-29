@@ -14,7 +14,7 @@ def get_publishings():
     from publish_python.cli import artifact_handlers
     from publish_python.cli import upload_handlers
 
-    config_path = pathlib.Path('publish_python.yaml')
+    config_path = pathlib.Path('publish-python.yaml')
     if not config_path.exists():
         raise RuntimeError(
             'Must be invoked in a directory containing a '
