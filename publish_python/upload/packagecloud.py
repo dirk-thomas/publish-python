@@ -24,7 +24,7 @@ def upload_packagecloud(*, artifacts, upload, config):
         destination = f'{repository}{version}'
         for artifact in artifacts:
             ext = os.path.splitext(artifact)[1]
-            if ext not in ('.deb', '.whl', '.dsc'):
+            if ext not in ('.deb', '.dsc', '.whl'):
                 continue
 
             basename = os.path.basename(artifact)
