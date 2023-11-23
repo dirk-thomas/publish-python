@@ -10,7 +10,7 @@ def upload_pypi(*, artifacts, upload, config):
     else:
         print('-- Skip uploading package to PyPI, pass --upload to actually '
               'upload artifacts')
-    cmd = ['twine', 'upload', '-s', *artifacts]
+    cmd = ['twine', 'upload', *artifacts]
     print('$', *cmd)
     if upload:
         subprocess.check_call(cmd)
