@@ -35,6 +35,7 @@ def create_deb(*, config):
             for env_var in setup_env_vars.split(' '):
                 key, value = env_var.split('=', 1)
                 add_env[key] = value
+        debinc = config_parser.get(pkg.name, 'Debian-Version', fallback='1')
 
         print(
             '$', *cmd,
@@ -49,9 +50,9 @@ def create_deb(*, config):
 
     return {
         f'deb_dist/{source_pkg_name}_{pkg.version}.orig.tar.gz',
-        f'deb_dist/{source_pkg_name}_{pkg.version}-1.debian.tar.gz',
-        f'deb_dist/{source_pkg_name}_{pkg.version}-1.dsc',
-        f'deb_dist/{source_pkg_name}_{pkg.version}-1_all.deb'}
+        f'deb_dist/{source_pkg_name}_{pkg.version}-{debinc}.debian.tar.gz',
+        f'deb_dist/{source_pkg_name}_{pkg.version}-{debinc}.dsc',
+        f'deb_dist/{source_pkg_name}_{pkg.version}-{debinc}_all.deb'}
 
 
 def clean_deb():
